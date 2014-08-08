@@ -36,7 +36,10 @@ public final class fbinv extends JavaPlugin {
 	Connection conn = null;
 	Statement stmt = null;
 	//logic stuff
-	boolean invBool;//state of the player's inventory (FALSE = natural, TRUE = kit)
+	//these should probably not be global, fix eventually
+	boolean invBool = true;//state of the player's inventory (FALSE = natural, TRUE = kit)
+	ItemStack armStore[];//stored armor of existing player
+	ItemStack invStore[];//stored inventory of existing player
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -123,15 +126,14 @@ public final class fbinv extends JavaPlugin {
     	}
     	
     	//Check if player is on server
-    	Player target = Bukkit.getServer().getPlayer(targetStr);
+    	Player target = Bukkit.getServer().getPlayer(targetStr);//TODO??
     	if (target == null) {
             sender.sendMessage(targetStr + " is not online!");
             return false;
         }
     	
     	//check DB for player bool
-    	//invBool = ...
-    	invBool = true; //TODO this is debuggery
+    	//invBool = ...//TODO
     	
     	if (invBool) {//If the player's inv is in a natural state
     		//Send them to the kit switch
@@ -153,38 +155,40 @@ public final class fbinv extends JavaPlugin {
     public boolean giveKit(CommandSender sender, Player target, int kitNum){
     	//copy player's inv to storage, clear inv, give kit
     	
-    	String targetStr;
-    	ItemStack myArmor[];
-    	myArmor = new ItemStack[4];
-    	ItemStack myKitItems[];
-    	myKitItems = new ItemStack[2];
+    	//String targetStr;
+    	ItemStack kitArmor[];//desired armor from kit
+    	kitArmor = new ItemStack[4];
+    	ItemStack kitItems[];//desired inventory from kit
+    	kitItems = new ItemStack[2];
     	
-    	targetStr = ((Player) target).getName();
-    	sender.sendMessage("You want to give a kit to "+targetStr);
-    	sender.sendMessage("You want to give kit number "+kitNum);
+    	//targetStr = ((Player) target).getName();
+    	//sender.sendMessage("You want to give a kit to "+targetStr);
+    	//sender.sendMessage("You want to give kit number "+kitNum);
     	
-    	PlayerInventory inventorymain = target.getInventory();
-    	//TODO store the player's inventory here
+    	PlayerInventory inventorymain = target.getInventory();//connect to target's inventory
+    	invStore = inventorymain.getContents();//obtain current items
+    	armStore = inventorymain.getArmorContents();//obtain current armor
+    	invBool = false;//switch bool to false
+    	//TODO store the player's inventory, armor and bool here
     	
     	inventorymain.clear();//delete the player's current inventory
     	
     	//Here I'm manually building the kit, but it'll pull the relevant kit from the db
     	//in later revisions
-    	myKitItems[0] = new ItemStack(Material.BAKED_POTATO, 10);
-    	myKitItems[1] = new ItemStack(Material.DIAMOND, 10);
+    	kitItems[0] = new ItemStack(Material.BAKED_POTATO, 10);
+    	kitItems[1] = new ItemStack(Material.DIAMOND, 10);
     	
     	//Set armor into array
     	//NOTE!: Critical that this order be preserved!
     	//Boots, Leggings, Chestplate, Helmet
     	//changing this order will cause bugs
-    	myArmor[0] = new ItemStack(Material.LEATHER_BOOTS, 1);
-    	myArmor[1] = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-    	myArmor[2] = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-    	myArmor[3] = new ItemStack(Material.LEATHER_HELMET, 1);
+    	kitArmor[0] = new ItemStack(Material.LEATHER_BOOTS, 1);
+    	kitArmor[1] = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+    	kitArmor[2] = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+    	kitArmor[3] = new ItemStack(Material.LEATHER_HELMET, 1);
     	
-    	inventorymain.addItem(myKitItems);//supply the player with the designated items
-    	inventorymain.setArmorContents(myArmor);//give player designated armor
-    	
+    	inventorymain.addItem(kitItems);//supply the player with the designated items
+    	inventorymain.setArmorContents(kitArmor);//equip player with designated armor
     	
     	return true;
     }
@@ -195,6 +199,17 @@ public final class fbinv extends JavaPlugin {
     	String targetStr;
     	targetStr = ((Player) target).getName();
     	sender.sendMessage("You want to restore the inventory of "+targetStr);
+    	
+    	//Pull player's inventory from storage
+    	//TODO right now this is just a debug test setup
+    	
+    	PlayerInventory inventorymain = target.getInventory();//connect to target's inventory
+    	inventorymain.setContents(invStore);//restore player's equipment
+    	//There's a good chance this line will cause an error if the player was wearing fewer than 4 armor pieces
+    	inventorymain.setArmorContents(armStore);//equip player with stored armor
+    	invBool = true;
+    	
+    	//TODO Set player's storage inventory and armor as empty, record new invBool in db
     	
     	return true;
     }
