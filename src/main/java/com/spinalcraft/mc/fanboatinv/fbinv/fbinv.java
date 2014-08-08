@@ -161,7 +161,7 @@ public final class fbinv extends JavaPlugin {
     	//ItemStack myArmor[];
     	//myArmor = new ItemStack[4];
     	ItemStack myKitItems[];
-    	myKitItems = new ItemStack[15];
+    	myKitItems = new ItemStack[2];
     	
     	targetStr = ((Player) target).getName();
     	sender.sendMessage("You want to give a kit to "+targetStr);
@@ -174,7 +174,7 @@ public final class fbinv extends JavaPlugin {
     	//Here I'm manually building the kit, but it'll pull the relevant kit from the db
     	//in later revisions
     	myKitItems[0] = new ItemStack(Material.BAKED_POTATO, 10);
-    	//myKitItems[1] = new ItemStack(Material.DIAMOND_SWORD, 1);
+    	myKitItems[1] = new ItemStack(Material.DIAMOND, 10);
     	myBoots = new ItemStack(Material.LEATHER_BOOTS, 1);
     	myChestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
     	myHelmet = new ItemStack(Material.LEATHER_HELMET, 1);
