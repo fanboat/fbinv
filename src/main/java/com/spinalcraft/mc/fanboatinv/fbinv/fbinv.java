@@ -154,12 +154,8 @@ public final class fbinv extends JavaPlugin {
     	//copy player's inv to storage, clear inv, give kit
     	
     	String targetStr;
-    	ItemStack myChestplate;
-    	ItemStack myLeggings;
-    	ItemStack myHelmet;
-    	ItemStack myBoots;
-    	//ItemStack myArmor[];
-    	//myArmor = new ItemStack[4];
+    	ItemStack myArmor[];
+    	myArmor = new ItemStack[4];
     	ItemStack myKitItems[];
     	myKitItems = new ItemStack[2];
     	
@@ -168,29 +164,27 @@ public final class fbinv extends JavaPlugin {
     	sender.sendMessage("You want to give kit number "+kitNum);
     	
     	PlayerInventory inventorymain = target.getInventory();
-    	//TODO store the player's inventory here    	
+    	//TODO store the player's inventory here
+    	
     	inventorymain.clear();//delete the player's current inventory
     	
     	//Here I'm manually building the kit, but it'll pull the relevant kit from the db
     	//in later revisions
     	myKitItems[0] = new ItemStack(Material.BAKED_POTATO, 10);
     	myKitItems[1] = new ItemStack(Material.DIAMOND, 10);
-    	myBoots = new ItemStack(Material.LEATHER_BOOTS, 1);
-    	myChestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-    	myHelmet = new ItemStack(Material.LEATHER_HELMET, 1);
-    	myLeggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-    	/*
+    	
+    	//Set armor into array
+    	//NOTE!: Critical that this order be preserved!
+    	//Boots, Leggings, Chestplate, Helmet
+    	//changing this order will cause bugs
     	myArmor[0] = new ItemStack(Material.LEATHER_BOOTS, 1);
-    	myArmor[1] = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-    	myArmor[2] = new ItemStack(Material.LEATHER_HELMET, 1);
-    	myArmor[3] = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-    	*/
+    	myArmor[1] = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+    	myArmor[2] = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+    	myArmor[3] = new ItemStack(Material.LEATHER_HELMET, 1);
+    	
     	inventorymain.addItem(myKitItems);//supply the player with the designated items
-    	//inventorymain.setArmorContents(myArmor);//give player designated armor
-    	inventorymain.setBoots(myBoots);
-    	inventorymain.setChestplate(myChestplate);
-    	inventorymain.setHelmet(myHelmet);
-    	inventorymain.setLeggings(myLeggings);
+    	inventorymain.setArmorContents(myArmor);//give player designated armor
+    	
     	
     	return true;
     }
