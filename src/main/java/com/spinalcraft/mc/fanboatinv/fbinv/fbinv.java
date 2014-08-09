@@ -18,6 +18,7 @@ package com.spinalcraft.mc.fanboatinv.fbinv;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,112 +33,112 @@ public final class fbinv extends JavaPlugin {
 	
 	//input stuff
 	//db stuff
-	//TODO get that db url
+	/*
 	String DB_URL = "http://mc.spinalcraft.com";
 	String USER = "root";
 	String PASS = "password";
 	Connection conn = null;
 	Statement stmt = null;
+	*/
 	//logic stuff
 	//these should not be global, fix eventually
 	boolean myGlobalInvBool = true;
-	//ItemStack[] myGlobalInvStore;
-	//ItemStack[] myGlobalArmStore;
 	fbKit myGlobalfbKit;
 	int myGlobalKitNum = 0;
 	
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("fbinv")) {//if standard swap command is called
-			//This command is used to give the player a kit OR restore their old inventory
-			//sender.sendMessage("you called fbinv");
-			if (args.length > 2) {
-		       sender.sendMessage("Too many arguments!");
-		       return false;
-		    } 
-		    if (args.length < 1) {
-		    	//apply directly to sender
-		    	if (!(sender instanceof Player)) {
-					sender.sendMessage("This command can only be run by a player");
-					sender.sendMessage("please use /fbinv <playername>");
-					sender.sendMessage("or /fbinv <playername> <kitnumber>");
-					return false;
-				} else {
-					//forward info to swapping method
-					String myTarget = ((Player) sender).getName();
-					String[] args2;
-					args2 = new String[2];
-					args2[0] = myTarget;
-					args2[1] = "0";
-					return swapInv(sender, cmd, label, args2);
+		if (cmd.getName().equalsIgnoreCase("fb")) {
+			String chooseCom = args[0];
+			String arg[] = new String[args.length-1];
+			arg = Arrays.copyOfRange(args, 1, args.length);
+			sender.sendMessage("Test1");//TODO
+			
+			if (chooseCom.equals("i")){//if standard swap command is called
+				sender.sendMessage("Test2");//TODO
+				//This command is used to give the player a kit OR restore their old inventory
+				if (arg.length < 1) {
+			    	//apply directly to sender
+			    	if (!(sender instanceof Player)) {
+						sender.sendMessage("This command can only be run by a player");
+						sender.sendMessage("please use /fb i <playername>");
+						sender.sendMessage("or /fb i <playername> <kitnumber>");
+						return true;
+					} else {
+						//forward info to swapping method
+						String myTarget = ((Player) sender).getName();
+						String[] args2;
+						args2 = new String[2];
+						args2[0] = myTarget;
+						args2[1] = "0";
+						return swapInv(sender, cmd, label, args2);
+					}
+			    }
+			    return swapInv(sender, cmd, label, arg);
+			}
+			if (chooseCom.equals("r")){//if reload command is called
+				//This command is used to reload the player's kit if they are carrying one
+				if (arg.length > 1) {
+					sender.sendMessage("Too many arguments!");
+					return true;
 				}
-		    }
-		    return swapInv(sender, cmd, label, args);
-		} 
-		
-		if (cmd.getName().equalsIgnoreCase("fbinvr")) {//if reload command is called
-			//This command is used to reload the player's kit if they are carrying one
-			if (args.length > 1) {
-				sender.sendMessage("Too many arguments!");
-				return false;
+				if (arg.length < 1) {
+			    	//apply directly to sender
+			    	if (!(sender instanceof Player)) {
+						sender.sendMessage("This command can only be run by a player");
+						sender.sendMessage("please use /fb r <playername>");
+						return true;
+					} else {
+						//forward info to swapping method
+						String myTarget = ((Player) sender).getName();
+						String[] args2;
+						args2 = new String[1];
+						args2[0] = myTarget;
+						return reloadKit(sender, args2);
+					}
+			    }
+			    return reloadKit(sender, arg);
 			}
-			if (args.length < 1) {
-		    	//apply directly to sender
-		    	if (!(sender instanceof Player)) {
+			if (chooseCom.equals("w")){//if write-kit command is called
+				if (!(sender instanceof Player)) {
 					sender.sendMessage("This command can only be run by a player");
-					sender.sendMessage("please use /fbinvr <playername>");
-					return false;
-				} else {
-					//forward info to swapping method
-					String myTarget = ((Player) sender).getName();
-					String[] args2;
-					args2 = new String[1];
-					args2[0] = myTarget;
-					return reloadKit(sender, args2);
+					sender.sendMessage("please use /fb w <playername> <Kit Number>");
+					return true;
 				}
-		    }
-		    return reloadKit(sender, args);
-		}
-		
-		if (cmd.getName().equalsIgnoreCase("fbinvw")) {//if write-kit command is called
-			if (!(sender instanceof Player)) {
-				sender.sendMessage("This command can only be run by a player");
-				sender.sendMessage("please use /fbinvr <playername> <Kit Number>");
-				return false;
-			}
-			if (args.length > 2) {
-				sender.sendMessage("Too many arguments!");
-				return false;
-			}
-			if (args.length < 1) {
-				sender.sendMessage("Please specify a Kit number!");
-				return false;
-			}
-			if (args.length == 1){
-				if (!isInt(args[0])){//if the argument is not an integer
-					sender.sendMessage("Please use /fbinvw <Kit Number>");
-					return false;
+				if (arg.length > 2) {
+					sender.sendMessage("Too many arguments!");
+					return true;
+				}
+				if (arg.length < 1) {
+					sender.sendMessage("Please specify a Kit number!");
+					return true;
+				}
+				if (arg.length == 1){
+					if (!isInt(arg[0])){//if the argument is not an integer
+						sender.sendMessage("Please use /fb w <Kit Number>");
+						return true;
+					}
+					else {
+						int kitNum = Integer.parseInt(arg[0]);
+						String targetStr = ((Player) sender).getName();
+						return writeKit(sender, targetStr, kitNum);
+					}
 				}
 				else {
-					int kitNum = Integer.parseInt(args[0]);
-					String targetStr = ((Player) sender).getName();
-					return writeKit(sender, targetStr, kitNum);
-				}
-			}
-			else {
-				if (!isInt(args[1])){//if the second argument is not an integer
-					sender.sendMessage("Please use /fbinvw <playername> <Kit Number>");
-					return false;
-				}
-				else {//make sure player is online
-					Player target = Bukkit.getServer().getPlayer(args[0]);//TODO??
-			    	if (target == null) {
-			            sender.sendMessage(args[0] + " is not online!");
-			            return false;
-			        }
-					int kitNum = Integer.parseInt(args[0]);
-					return writeKit(sender, args[0], kitNum);
+					if (!isInt(arg[1])){//if the second argument is not an integer
+						sender.sendMessage("Please use /fb w <playername> <Kit Number>");
+						return true;
+					}
+					else {//make sure player is online
+						Player target = Bukkit.getServer().getPlayer(arg[0]);//TODO??
+				    	if (target == null) {
+				            sender.sendMessage(arg[0] + " is not online!");
+				            return true;
+				        }
+						int kitNum = Integer.parseInt(arg[0]);
+						return writeKit(sender, arg[0], kitNum);
+					}
 				}
 			}
 		}
@@ -162,7 +163,7 @@ public final class fbinv extends JavaPlugin {
     public boolean swapInv(CommandSender sender, Command cmd, String label, String[] args){
     	String targetStr;
     	int kitNum;
-    	//sender.sendMessage("This is working so far");
+    	sender.sendMessage("This is working so far");//TODO
     	if (!isInt(args[0])){//if the first argument is not an integer
     		//It is the target's name
     		targetStr = args[0];
@@ -187,9 +188,9 @@ public final class fbinv extends JavaPlugin {
     		//make sure sender is player
     		if (!(sender instanceof Player)) {
 				sender.sendMessage("This command can only be run by a player");
-				sender.sendMessage("please use /fbinv <playername>");
-				sender.sendMessage("or /fbinv <playername> <kitnumber>");
-				return false;
+				sender.sendMessage("please use /fb i <playername>");
+				sender.sendMessage("or /fb i <playername> <kitnumber>");
+				return true;
     		}
 			else {
 				//assign sender as player
@@ -201,7 +202,7 @@ public final class fbinv extends JavaPlugin {
     	Player target = Bukkit.getServer().getPlayer(targetStr);//TODO??
     	if (target == null) {
             sender.sendMessage(targetStr + " is not online!");
-            return false;
+            return true;
         }
     	
     	if (checkInvBool(targetStr)) {//If the player's inv is in a natural state
@@ -211,7 +212,7 @@ public final class fbinv extends JavaPlugin {
     		}
     		else {
     			sender.sendMessage(targetStr + " is not holding a kit!");
-    			return false;
+    			return true;
     		}
     	}
     	else {//if the player is holding a kit
@@ -219,7 +220,7 @@ public final class fbinv extends JavaPlugin {
     		if (kitNum != 0){//if attempting to assign a kit
     			sender.sendMessage(targetStr + " is already holding a kit!");
     			sender.sendMessage("Remove kit before assigning new one");
-    			return false;
+    			return true;
     		}
     		else {
     			return restoreInv(sender, target);
@@ -247,7 +248,7 @@ public final class fbinv extends JavaPlugin {
     	//store player's current gear in db
     	if (!recordInv(targetStr, false, invStore, armStore, kitNum)){
     		sender.sendMessage("Could not write to database!");
-    		return false;
+    		return true;
     	}
     	
     	inventorymain.clear();//delete the player's current inventory
@@ -276,14 +277,14 @@ public final class fbinv extends JavaPlugin {
     	
     	targetStr = args[0];
     	
-    	Player target = Bukkit.getServer().getPlayer(targetStr);//TODO??
+    	Player target = Bukkit.getServer().getPlayer(targetStr);
     	if (target == null) {
             sender.sendMessage(targetStr + " is not online!");
-            return false;
+            return true;
         }
     	if (checkInvBool(targetStr)) {//if the player is not carrying a kit
     		sender.sendMessage(targetStr + " does not have a kit to reload!");
-    		return false;
+    		return true;
     	}
     	
     	//elsewise reload the player's kit

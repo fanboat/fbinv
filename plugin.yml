@@ -2,18 +2,8 @@ name: fbinv
 main: com.spinalcraft.mc.fanboatinv.fbinv.fbinv
 version: 0.1
 commands:
-  fbinv:
-    description: Swaps players inventory and a kit
-    usage: /<command> [player] [kit]
-    permission: <plugin name>.basic
-    permission-message: You don't have <permission>
-  fbinvr:
-    description: Restores kit to full if player has a kit
-    usage: /<command> [player]
-    permission: <plugin name>.basic
-    permission-message: You don't have <permission>
-  fbinvw:
-    description: Records player's inventory as a kit
-    usage: /<command> [kit]
+  fb:
+    description: Access fb inventory system
+    usage: /<command> [subcommand]
     permission: <plugin name>.basic
     permission-message: You don't have <permission>
