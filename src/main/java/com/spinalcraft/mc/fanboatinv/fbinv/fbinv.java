@@ -41,10 +41,14 @@ public final class fbinv extends JavaPlugin {
 	Statement stmt = null;
 	*/
 	//logic stuff
+	int MAXKITS = 20;//maximum number of kits allowed
 	//these should not be global, fix eventually
 	boolean myGlobalInvBool = true;
 	fbKit myGlobalfbKit;
+	boolean myKitList[] = new boolean[MAXKITS+1];
 	int myGlobalKitNum = 0;
+	
+	fbKit myGlobalGiveKits[] = new fbKit[MAXKITS];
 	
 
 	@Override
@@ -53,10 +57,8 @@ public final class fbinv extends JavaPlugin {
 			String chooseCom = args[0];
 			String arg[] = new String[args.length-1];
 			arg = Arrays.copyOfRange(args, 1, args.length);
-			sender.sendMessage("Test1");//TODO
 			
 			if (chooseCom.equals("i")){//if standard swap command is called
-				sender.sendMessage("Test2");//TODO
 				//This command is used to give the player a kit OR restore their old inventory
 				if (arg.length < 1) {
 			    	//apply directly to sender
@@ -149,21 +151,27 @@ public final class fbinv extends JavaPlugin {
 	@Override
     public void onEnable() {
         //Insert logic to be performed when the plugin is enabled?
-		getLogger().info("onEnable has been invoked!");
+		getLogger().info("fbinv activated");
 		//Bukkit.broadcastMessage("onEnable has been invoked!");
+		
+		//TODO fix this
+		myKitList[0] = true;
+		for (int i=0;i<MAXKITS;i++){
+			myKitList[i+1] = false;
+		}
     }
  
     @Override
     public void onDisable() {
         //Insert logic to be performed when the plugin is disabled?
-    	getLogger().info("onDisable has been invoked!");
+    	getLogger().info("fbinv deactivated");
     	//Bukkit.broadcastMessage("onDisable has been invoked!");
     }
     
     public boolean swapInv(CommandSender sender, Command cmd, String label, String[] args){
     	String targetStr;
     	int kitNum;
-    	sender.sendMessage("This is working so far");//TODO
+    	//sender.sendMessage("This is working so far");
     	if (!isInt(args[0])){//if the first argument is not an integer
     		//It is the target's name
     		targetStr = args[0];
@@ -237,6 +245,15 @@ public final class fbinv extends JavaPlugin {
     	ItemStack kitItems[];//desired inventory from kit
     	fbKit myKit;//kit to be given to player
     	
+    	if (kitNum > MAXKITS){
+    		sender.sendMessage("Kit number "+kitNum+" is not an existing Kit!");
+    		return true;
+    	}
+    	else if (!myKitList[kitNum]){
+    		sender.sendMessage("Kit number "+kitNum+" is not an existing Kit!");
+    		return true;
+    	}
+    	
     	String targetStr = ((Player) target).getName();
     	//sender.sendMessage("You want to give a kit to "+targetStr);
     	//sender.sendMessage("You want to give kit number "+kitNum);
@@ -257,7 +274,7 @@ public final class fbinv extends JavaPlugin {
     	inventorymain.setChestplate(new ItemStack(Material.AIR, 1));
     	inventorymain.setHelmet(new ItemStack(Material.AIR, 1));
     	
-    	myKit = chooseKit(checkKitNum(targetStr));//get the desired kit 
+    	myKit = chooseKit(kitNum);//get the desired kit 
     	kitItems = myKit.Items;
     	kitArmor = myKit.Armors;
     	
@@ -332,7 +349,28 @@ public final class fbinv extends JavaPlugin {
     
     public boolean writeKit(CommandSender sender, String targetStr, int kitNum){
     	//Store player's current inventory as a template for later use as a kit
-    	sender.sendMessage("This doesn't do anything yet");
+    	ItemStack invWrite[];
+    	ItemStack armWrite[];
+    	Player target = Bukkit.getServer().getPlayer(targetStr);
+    	if (target == null) {
+            sender.sendMessage(targetStr + " is not online!");
+            return true;
+        }
+    	
+    	if (kitNum > MAXKITS){
+    		sender.sendMessage("Maximum Kit Number is "+MAXKITS);
+    		return true;
+    	}
+    	
+    	PlayerInventory inventorymain = target.getInventory();//connect to target's inventory
+    	invWrite = inventorymain.getContents();//obtain current items
+    	armWrite = inventorymain.getArmorContents();//obtain current armor
+    	
+    	myGlobalGiveKits[kitNum-1] = new fbKit(invWrite,armWrite);//store as a template Kit
+    	myKitList[kitNum] = true;
+    	
+    	sender.sendMessage("Current loadout stored as Kit "+kitNum);
+    	
     	return true;
     }
     
@@ -374,6 +412,7 @@ public final class fbinv extends JavaPlugin {
     	
     	//Here I'm manually building the kit, but it'll pull the relevant kit from the db
     	//in later revisions. USE KITNUM FROM DB TO SELECT KIT
+    	/*
     	ItemStack kitArmor[];//desired armor from kit
     	kitArmor = new ItemStack[4];
     	ItemStack kitItems[];//desired inventory from kit
@@ -389,8 +428,9 @@ public final class fbinv extends JavaPlugin {
     	kitArmor[3] = new ItemStack(Material.LEATHER_HELMET, 1);
     	
     	myKit = new fbKit(kitItems,kitArmor);
+    	*/
     	
-    	return myKit;
+    	return myGlobalGiveKits[kitNum-1];
     }
     
     //connect to the ol' db
