@@ -8,7 +8,12 @@ commands:
     permission: <plugin name>.basic
     permission-message: You don't have <permission>
   fbinvr:
-    description: restores kit to full if player has a kit.
+    description: Restores kit to full if player has a kit
     usage: /<command> [player]
+    permission: <plugin name>.basic
+    permission-message: You don't have <permission>
+  fbinvw:
+    description: Records player's inventory as a kit
+    usage: /<command> [kit]
     permission: <plugin name>.basic
     permission-message: You don't have <permission>
