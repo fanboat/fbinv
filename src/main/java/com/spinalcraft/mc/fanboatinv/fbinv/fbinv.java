@@ -13,7 +13,7 @@
 package com.spinalcraft.mc.fanboatinv.fbinv;
 
 import java.sql.Connection;
-//import java.sql.DriverManager;
+import java.sql.DriverManager;
 import java.sql.Statement;
 
 import org.bukkit.Bukkit;
@@ -30,9 +30,9 @@ public final class fbinv extends JavaPlugin {
 	//input stuff
 	//db stuff
 	//TODO get that db url
-	String DB_URL = "???";
+	String DB_URL = "http://mc.spinalcraft.com";
 	String USER = "root";
-	String PASS = "";
+	String PASS = "password";
 	Connection conn = null;
 	Statement stmt = null;
 	//logic stuff
@@ -43,7 +43,7 @@ public final class fbinv extends JavaPlugin {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("fbinv")) { 
+		if (cmd.getName().equalsIgnoreCase("fbinv")) {//if standard swap command is called
 			//sender.sendMessage("you called fbinv");
 			if (args.length > 2) {
 		       sender.sendMessage("Too many arguments!");
@@ -69,6 +69,32 @@ public final class fbinv extends JavaPlugin {
 		    swapInv(sender, cmd, label, args);
 			return true;
 		} 
+		
+		if (cmd.getName().equalsIgnoreCase("fbinvr")) {//if restore command is called
+			if (args.length > 1) {
+				sender.sendMessage("Too many arguments!");
+				return false;
+			}
+			if (args.length < 1) {
+		    	//apply directly to sender
+		    	if (!(sender instanceof Player)) {
+					sender.sendMessage("This command can only be run by a player");
+					sender.sendMessage("please use /fbinv <playername>");
+					sender.sendMessage("or /fbinv <playername> <kitnumber>");
+				} else {
+					//forward info to swapping method
+					String myTarget = ((Player) sender).getName();
+					String[] args2;
+					args2 = new String[1];
+					args2[0] = myTarget;
+					reloadKit(sender, args2);
+				}
+				return true;
+		    }
+		    reloadKit(sender, args);
+			return true;
+		}
+		
 		return false; 
 	}
 	
@@ -169,7 +195,7 @@ public final class fbinv extends JavaPlugin {
     	invStore = inventorymain.getContents();//obtain current items
     	armStore = inventorymain.getArmorContents();//obtain current armor
     	invBool = false;//switch bool to false
-    	//TODO store the player's inventory, armor and bool here
+    	//TODO store the player's inventory, armor bool and kitnum here
     	
     	inventorymain.clear();//delete the player's current inventory
     	
@@ -193,12 +219,60 @@ public final class fbinv extends JavaPlugin {
     	return true;
     }
     
+    public boolean reloadKit(CommandSender sender, String[] args){
+    	//reload the kit of a player who is carrying one
+    	
+    	String targetStr;
+    	ItemStack kitArmor[];//desired armor from kit
+    	kitArmor = new ItemStack[4];
+    	ItemStack kitItems[];//desired inventory from kit
+    	kitItems = new ItemStack[2];
+    	
+    	targetStr = args[0];
+    	
+    	//TODO pull the target's bool and kitnum from db
+    	
+    	Player target = Bukkit.getServer().getPlayer(targetStr);//TODO??
+    	if (target == null) {
+            sender.sendMessage(targetStr + " is not online!");
+            return false;
+        }
+    	if (invBool) {//if the player is not carrying a kit
+    		sender.sendMessage(targetStr + " does not have a kit to reload!");
+    		return false;
+    	}
+    	
+    	//elsewise reload the player's kit
+    	
+    	PlayerInventory inventorymain = target.getInventory();//connect to target's inventory
+    	inventorymain.clear();//delete the player's current inventory
+    	
+    	//Here I'm manually building the kit, but it'll pull the relevant kit from the db
+    	//in later revisions. USE KITNUM FROM DB TO SELECT KIT
+    	kitItems[0] = new ItemStack(Material.BAKED_POTATO, 10);
+    	kitItems[1] = new ItemStack(Material.DIAMOND, 10);
+    	
+    	//Set armor into array
+    	//NOTE!: Critical that this order be preserved!
+    	//Boots, Leggings, Chestplate, Helmet
+    	//changing this order will cause bugs
+    	kitArmor[0] = new ItemStack(Material.LEATHER_BOOTS, 1);
+    	kitArmor[1] = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+    	kitArmor[2] = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+    	kitArmor[3] = new ItemStack(Material.LEATHER_HELMET, 1);
+    	
+    	inventorymain.addItem(kitItems);//supply the player with the designated items (in full, undamaged)
+    	inventorymain.setArmorContents(kitArmor);//equip player with designated armor (undamaged)
+    	
+    	return true;
+    }
+    
     public boolean restoreInv(CommandSender sender, Player target){
     	//delete player's inventory, restore the stored items, clear the storage
     	
     	String targetStr;
     	targetStr = ((Player) target).getName();
-    	sender.sendMessage("You want to restore the inventory of "+targetStr);
+    	//sender.sendMessage("You want to restore the inventory of "+targetStr);
     	
     	//Pull player's inventory from storage
     	//TODO right now this is just a debug test setup
@@ -214,7 +288,7 @@ public final class fbinv extends JavaPlugin {
     	return true;
     }
     
-    /*
+    //connect to the ol' db
     public void connectToDatabase() {
 		// Establish an SQL connection and create the database
 		// if it's not already there.
@@ -231,10 +305,10 @@ public final class fbinv extends JavaPlugin {
 			stmt = conn.createStatement();
 
 			// Make sure the database exists
-			stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS HomeflixBase");
+			stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS FBinv");
 
 			// Use the database
-			query = "USE HomeflixBase";
+			query = "USE FBinv";
 			stmt.executeQuery(query);
 
 			// Make sure the Library table exists
@@ -245,7 +319,7 @@ public final class fbinv extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
-	*/
+	
     
     public static boolean isInt(String string) {
     	try {

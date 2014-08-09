@@ -3,7 +3,12 @@ main: com.spinalcraft.mc.fanboatinv.fbinv.fbinv
 version: 0.1
 commands:
   fbinv:
-    description: This is a demo command.
+    description: Swaps players inventory and a kit
     usage: /<command> [player] [kit]
+    permission: <plugin name>.basic
+    permission-message: You don't have <permission>
+  fbinvr:
+    description: restores kit to full if player has a kit.
+    usage: /<command> [player]
     permission: <plugin name>.basic
     permission-message: You don't have <permission>
